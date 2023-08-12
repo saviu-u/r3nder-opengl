@@ -189,7 +189,9 @@ int main()
     glm::mat4 projection = glm::perspective(glm::radians(90.0f), (float) width / height, 0.1f, 100.0f);
 
     // Calculate model matrix for rotation
-    model = glm::rotate(model, (float)(glfwGetTime() * M_PI / 2), glm::vec3(0.0f, 1.0f, 0.0f));
+    double time = glfwGetTime();
+
+    model = glm::rotate(model, (float)(time * M_PI / 2), glm::vec3(cos(time), sin(time), 0.0f));
 
     // Pass matrices to the shader
     glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(model));
