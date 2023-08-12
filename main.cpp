@@ -72,6 +72,11 @@ float cubeVertices[] = {
     -0.5f, 0.5f, -0.5f, 0.0f, 1.0f, 0.0f  // Bottom-left
 };
 
+void framebuffer_size_callback(GLFWwindow *window, int width, int height)
+{
+  glViewport(0, 0, width, height);
+}
+
 int main()
 {
   // Initialize GLFW
@@ -86,6 +91,9 @@ int main()
     return -1;
   }
   glfwMakeContextCurrent(window);
+
+  // Set framebuffer size callback
+  glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
   // Load GLAD
   if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
@@ -167,6 +175,9 @@ int main()
   // Set up rendering loop
   while (!glfwWindowShouldClose(window))
   {
+    int width, height;
+    glfwGetWindowSize(window, &width, &height);
+
     // Clear the screen
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -179,7 +190,7 @@ int main()
 
     // Set model, view, and projection matrices
     glm::mat4 view = glm::lookAt(glm::vec3(0.0f, 0.0f, 3.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-    glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)800 / (float)600, 0.1f, 100.0f);
+    glm::mat4 projection = glm::perspective(glm::radians(90.0f), (float) width / height, 0.1f, 100.0f);
 
     // Calculate model matrix for rotation
     model = glm::rotate(model, (float)(glfwGetTime() * M_PI / 2), glm::vec3(0.0f, 1.0f, 0.0f));
