@@ -49,13 +49,13 @@ float cubeVertices[] = {
     -0.5f, -0.5f, -0.5f, // Bottom-left
     -0.5f, -0.5f, 0.5f,  // Bottom-right
     -0.5f, 0.5f, 0.5f,   // Top-right
-                                            // Right face
-    0.5f, 0.5f, 0.5f,     // Top-left
-    0.5f, 0.5f, -0.5f,    // Top-right
-    0.5f, -0.5f, -0.5f,   // Bottom-right
-    0.5f, -0.5f, -0.5f,   // Bottom-right
-    0.5f, -0.5f, 0.5f,    // Bottom-left
-    0.5f, 0.5f, 0.5f,     // Top-left
+    // Right face
+    0.5f, 0.5f, 0.5f,   // Top-left
+    0.5f, 0.5f, -0.5f,  // Top-right
+    0.5f, -0.5f, -0.5f, // Bottom-right
+    0.5f, -0.5f, -0.5f, // Bottom-right
+    0.5f, -0.5f, 0.5f,  // Bottom-left
+    0.5f, 0.5f, 0.5f,   // Top-left
     // Bottom face
     -0.5f, -0.5f, -0.5f, // Top-right
     0.5f, -0.5f, -0.5f,  // Top-left
@@ -186,7 +186,7 @@ int main()
 
     // Set model, view, and projection matrices
     glm::mat4 view = glm::lookAt(glm::vec3(0.0f, 0.0f, 3.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-    glm::mat4 projection = glm::perspective(glm::radians(90.0f), (float) width / height, 0.1f, 100.0f);
+    glm::mat4 projection = glm::perspective(glm::radians(90.0f), (float)width / height, 0.1f, 100.0f);
 
     // Calculate model matrix for rotation
     double time = glfwGetTime();
