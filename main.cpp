@@ -2,18 +2,20 @@
 #include <GLFW/glfw3.h>
 #include <iostream>
 #include <glm/glm.hpp>
+#include <glm/gtx/euler_angles.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+
+#include "prebuilt/cube.h"
 
 const char *vertexShaderSource = R"(
     #version 330 core
     layout (location = 0) in vec3 aPos;
     out vec3 fragColor; // Color output to fragment shader
-    uniform mat4 model;
     uniform mat4 view;
     uniform mat4 projection;
     void main() {
-        gl_Position = projection * view * model * vec4(aPos, 1.0);
+        gl_Position = projection * view * vec4(aPos, 1.0);
         fragColor = aPos + 0.5; // Use position as color offset
     }
 )";
@@ -26,51 +28,6 @@ const char *fragmentShaderSource = R"(
         FragColor = vec4(fragColor, 1.0);
     }
 )";
-
-float cubeVertices[] = {
-    // Back face
-    -0.5f, -0.5f, -0.5f, // Bottom-left
-    0.5f, -0.5f, -0.5f,  // Bottom-right
-    0.5f, 0.5f, -0.5f,   // Top-right
-    0.5f, 0.5f, -0.5f,   // Top-right
-    -0.5f, 0.5f, -0.5f,  // Top-left
-    -0.5f, -0.5f, -0.5f, // Bottom-left
-    // Front face
-    -0.5f, -0.5f, 0.5f, // Bottom-left
-    0.5f, -0.5f, 0.5f,  // Bottom-right
-    0.5f, 0.5f, 0.5f,   // Top-right
-    0.5f, 0.5f, 0.5f,   // Top-right
-    -0.5f, 0.5f, 0.5f,  // Top-left
-    -0.5f, -0.5f, 0.5f, // Bottom-left
-    // Left face
-    -0.5f, 0.5f, 0.5f,   // Top-right
-    -0.5f, 0.5f, -0.5f,  // Top-left
-    -0.5f, -0.5f, -0.5f, // Bottom-left
-    -0.5f, -0.5f, -0.5f, // Bottom-left
-    -0.5f, -0.5f, 0.5f,  // Bottom-right
-    -0.5f, 0.5f, 0.5f,   // Top-right
-    // Right face
-    0.5f, 0.5f, 0.5f,   // Top-left
-    0.5f, 0.5f, -0.5f,  // Top-right
-    0.5f, -0.5f, -0.5f, // Bottom-right
-    0.5f, -0.5f, -0.5f, // Bottom-right
-    0.5f, -0.5f, 0.5f,  // Bottom-left
-    0.5f, 0.5f, 0.5f,   // Top-left
-    // Bottom face
-    -0.5f, -0.5f, -0.5f, // Top-right
-    0.5f, -0.5f, -0.5f,  // Top-left
-    0.5f, -0.5f, 0.5f,   // Bottom-left
-    0.5f, -0.5f, 0.5f,   // Bottom-left
-    -0.5f, -0.5f, 0.5f,  // Bottom-right
-    -0.5f, -0.5f, -0.5f, // Top-right
-    // Top face
-    -0.5f, 0.5f, -0.5f, // Bottom-left
-    0.5f, 0.5f, -0.5f,  // Bottom-right
-    0.5f, 0.5f, 0.5f,   // Top-right
-    0.5f, 0.5f, 0.5f,   // Top-right
-    -0.5f, 0.5f, 0.5f,  // Top-left
-    -0.5f, 0.5f, -0.5f  // Bottom-left
-};
 
 void framebuffer_size_callback(GLFWwindow *window, int width, int height)
 {
@@ -113,30 +70,10 @@ int main()
   glShaderSource(vertexShader, 1, &vertexShaderSource, nullptr);
   glCompileShader(vertexShader);
 
-  // Check for compilation errors
-  int success;
-  char infoLog[512];
-  glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
-  if (!success)
-  {
-    glGetShaderInfoLog(vertexShader, 512, nullptr, infoLog);
-    std::cerr << "Vertex shader compilation failed\n"
-              << infoLog << std::endl;
-  }
-
   // Fragment Shader
   fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
   glShaderSource(fragmentShader, 1, &fragmentShaderSource, nullptr);
   glCompileShader(fragmentShader);
-
-  // Check for compilation errors
-  glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
-  if (!success)
-  {
-    glGetShaderInfoLog(fragmentShader, 512, nullptr, infoLog);
-    std::cerr << "Fragment shader compilation failed\n"
-              << infoLog << std::endl;
-  }
 
   // Shader Program
   shaderProgram = glCreateProgram();
@@ -144,27 +81,24 @@ int main()
   glAttachShader(shaderProgram, fragmentShader);
   glLinkProgram(shaderProgram);
 
-  // Check for linking errors
-  glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
-  if (!success)
-  {
-    glGetProgramInfoLog(shaderProgram, 512, nullptr, infoLog);
-    std::cerr << "Shader program linking failed\n"
-              << infoLog << std::endl;
-  }
-
   // Set up cube vertices and buffers
   unsigned int VBO, cubeVAO;
   glGenVertexArrays(1, &cubeVAO);
   glGenBuffers(1, &VBO);
 
+  Cube cube(2.0f);
+  std::vector<float> cubeVertices = cube.worldFacesVerticesBuffer();
+
   glBindVertexArray(cubeVAO);
   glBindBuffer(GL_ARRAY_BUFFER, VBO);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(cubeVertices), cubeVertices, GL_STATIC_DRAW);
+  glBufferData(GL_ARRAY_BUFFER, cubeVertices.size() * sizeof(float), cubeVertices.data(), GL_STATIC_DRAW);
+
+  // After linking the shader program
+  int positionAttributeLocation = glGetAttribLocation(shaderProgram, "aPos");
 
   // Vertex positions
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)0);
-  glEnableVertexAttribArray(0);
+  glVertexAttribPointer(positionAttributeLocation, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)0);
+  glEnableVertexAttribArray(positionAttributeLocation);
 
   glBindVertexArray(0);
 
@@ -182,19 +116,14 @@ int main()
     glUseProgram(shaderProgram);
     glBindVertexArray(cubeVAO);
 
-    glm::mat4 model(1.0f);
-
     // Set model, view, and projection matrices
-    glm::mat4 view = glm::lookAt(glm::vec3(0.0f, 0.0f, 3.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+    glm::mat4 view = glm::lookAt(glm::vec3(2.0f, 1.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
     glm::mat4 projection = glm::perspective(glm::radians(90.0f), (float)width / height, 0.1f, 100.0f);
 
     // Calculate model matrix for rotation
     double time = glfwGetTime();
 
-    model = glm::rotate(model, (float)(time * M_PI / 2), glm::vec3(cos(time), sin(time), 0.0f));
-
     // Pass matrices to the shader
-    glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(model));
     glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "view"), 1, GL_FALSE, glm::value_ptr(view));
     glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
 
