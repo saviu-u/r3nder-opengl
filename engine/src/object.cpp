@@ -1,6 +1,7 @@
-#include <object.h>
 #include <map>
 #include <glm/gtx/euler_angles.hpp>
+#include "screen.h"
+#include "object.h"
 
 // constructors
 
@@ -32,6 +33,27 @@ void Object::rotateTo(const glm::vec3 eulerAngles){
   rotation = eulerAngles;
   refreshRotationMatrix();
   recalculateWorldVertices();
+}
+
+void Object::assignVAOandVBO(Screen *screen){
+// Set up cube vertices and buffers
+  glGenVertexArrays(1, &VAO);
+  glGenBuffers(1, &VBO);
+
+  std::vector<float> vertices = worldFacesVerticesBuffer();
+
+  glBindVertexArray(VAO);
+  glBindBuffer(GL_ARRAY_BUFFER, VBO);
+  glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), vertices.data(), GL_STATIC_DRAW);
+
+  // After linking the shader program
+  int positionAttributeLocation = glGetAttribLocation(screen->getShaderProgramAddress(), "aPos");
+
+  // Vertex positions
+  glVertexAttribPointer(positionAttributeLocation, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)0);
+  glEnableVertexAttribArray(positionAttributeLocation);
+
+  glBindVertexArray(0);
 }
 
 // protected

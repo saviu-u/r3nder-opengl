@@ -1,9 +1,13 @@
 #pragma once
 
 #include <glm/glm.hpp>
+#include <glad/glad.h>
+#include <GLFW/glfw3.h>
 #include <vector>
 #include <array>
 #include <map>
+
+class Screen;
 
 class Object{
 public:
@@ -14,6 +18,9 @@ public:
   std::vector<float> worldFacesVerticesBuffer() const;
   void moveTo(const glm::vec3 newPosition);
   void rotateTo(const glm::vec3 eulerAngles);
+  void assignVAOandVBO(Screen* screen);
+
+  unsigned int getVAO_address() { return VAO; }
 
 protected:
   void Initialize();
@@ -41,4 +48,7 @@ private:
   std::vector<glm::vec3*> worldVertices;
   std::vector<std::array<glm::vec3*, 3>> worldFaces;
   std::map<glm::vec3*, glm::vec3*> localVerticesToWorld;
+
+  unsigned int VAO;
+  unsigned int VBO;
 };
