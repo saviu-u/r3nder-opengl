@@ -16,9 +16,12 @@ public:
   ~Object();
 // methods
   std::vector<float> worldFacesVerticesBuffer() const;
+  std::vector<std::array<glm::vec3, 3>> worldFaces() const;
+
   void moveTo(const glm::vec3 newPosition);
   void rotateTo(const glm::vec3 eulerAngles);
   void assignVAOandVBO(Screen* screen);
+  void reassignVAOandVBO();
 
   unsigned int getVAO_address() { return VAO; }
 
@@ -40,14 +43,12 @@ protected:
   glm::vec3 position = { 0, 0, 0 };
   glm::vec3 rotation = { 0, 0, 0 };
 
-  std::vector<glm::vec3*> localVertices;
-  std::vector<std::array<glm::vec3*, 3>> localFaces;
+  std::vector<glm::vec3> localVertices;
+  std::vector<glm::vec3> worldVertices;
+  std::vector<std::array<unsigned int, 3>> localFaces;
 
 private:
   glm::mat4 rotationMatrix;
-  std::vector<glm::vec3*> worldVertices;
-  std::vector<std::array<glm::vec3*, 3>> worldFaces;
-  std::map<glm::vec3*, glm::vec3*> localVerticesToWorld;
 
   unsigned int VAO;
   unsigned int VBO;

@@ -5,6 +5,7 @@ int main()
 {
   Screen screen;
   Cube cube(2.0f);
+  cube.rotateTo({45, 0, 0});
 
   screen.addObjectToScene(cube);
 

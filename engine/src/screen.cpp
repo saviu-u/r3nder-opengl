@@ -48,7 +48,7 @@ void Screen::eventLoop() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     // Set model, view, and projection matrices
-    glm::mat4 view = glm::lookAt(glm::vec3(2.0f, 1.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+    glm::mat4 view = glm::lookAt(glm::vec3(0.0f, 0.0f, -3.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
     glm::mat4 projection = glm::perspective(glm::radians(90.0f), aspectRatio, 0.1f, 100.0f);
 
     // Use shader program and bind cube VAO
@@ -97,8 +97,8 @@ void Screen::initializeGL(){
 void Screen::compileShaders(){
   shaderAddresses.clear();
 
-  std::string shaderCodeVertex = importShader("vertex_shader.glsl");
-  std::string shaderCodeFragment = importShader("fragment_shader.glsl");
+  std::string shaderCodeVertex = importShader("vertex_shader.vert");
+  std::string shaderCodeFragment = importShader("fragment_shader.frag");
 
   const char* vertexCode = shaderCodeVertex.c_str();
   const char* fragmentCode = shaderCodeFragment.c_str();
