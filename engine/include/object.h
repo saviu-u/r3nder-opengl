@@ -15,15 +15,17 @@ public:
   Object();
   ~Object();
 // methods
-  std::vector<float> worldFacesVerticesBuffer() const;
   std::vector<std::array<glm::vec3, 3>> worldFaces() const;
 
   void moveTo(const glm::vec3 newPosition);
   void rotateTo(const glm::vec3 eulerAngles);
   void assignVAOandVBO(Screen* screen);
-  void reassignVAOandVBO();
+  void renderToGPU();
 
-  unsigned int getVAO_address() { return VAO; }
+  unsigned int getVAO_address() const { return VAO; }
+  unsigned int getFaceSize() const { return localFaces.size(); }
+
+  bool isGPUrefreshed() { return GPUrefreshed; }
 
 protected:
   void Initialize();
@@ -49,6 +51,8 @@ protected:
 
 private:
   glm::mat4 rotationMatrix;
+
+  bool GPUrefreshed = true;
 
   unsigned int VAO;
   unsigned int VBO;

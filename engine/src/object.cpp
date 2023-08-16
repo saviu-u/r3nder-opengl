@@ -9,19 +9,23 @@ Object::~Object() {}
 Object::Object() {}
 
 // public
+void Object::renderToGPU() {
+  glBindVertexArray(VAO);
+  glBindBuffer(GL_ARRAY_BUFFER, VBO);
 
-std::vector<float> Object::worldFacesVerticesBuffer() const {
-  std::vector<float> buffer;
+  std::vector<std::array<glm::vec3, 3>> faces = worldFaces();
 
-  for(std::array<glm::vec3, 3> face : worldFaces()){
-    for(glm::vec3 vertex : face){
-      buffer.push_back(vertex.x);
-      buffer.push_back(vertex.y);
-      buffer.push_back(vertex.z);
-    }
+  for(int i = 0 ; i < faces.size() ; i++){
+    std::array<glm::vec3, 3> face = faces[i];
+    u_int faceSize = face.size() * sizeof(glm::vec3);
+
+    glBufferSubData(GL_ARRAY_BUFFER, i * faceSize, faceSize, face.data());
   }
 
-  return buffer;
+  glBindBuffer(GL_ARRAY_BUFFER, 0);
+  glBindVertexArray(0);
+
+  GPUrefreshed = true;
 }
 
 void Object::moveTo(const glm::vec3 newPosition){
@@ -34,7 +38,6 @@ void Object::rotateTo(const glm::vec3 eulerAngles){
   refreshRotationMatrix();
   recalculateWorldVertices();
 }
-
 
 std::vector<std::array<glm::vec3, 3>> Object::worldFaces() const {
   std::vector<std::array<glm::vec3, 3>> worldFaces;
@@ -50,12 +53,9 @@ void Object::assignVAOandVBO(Screen *screen){
   glGenVertexArrays(1, &VAO);
   glGenBuffers(1, &VBO);
 
-  std::vector<float> vertices = worldFacesVerticesBuffer();
-
   glBindVertexArray(VAO);
   glBindBuffer(GL_ARRAY_BUFFER, VBO);
-
-  glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), vertices.data(), GL_DYNAMIC_DRAW);
+  glBufferData(GL_ARRAY_BUFFER, localFaces.size() * 3 * sizeof(glm::vec3), (void *)0, GL_DYNAMIC_DRAW);
 
   // After linking the shader program
   int positionAttributeLocation = glGetAttribLocation(screen->getShaderProgramAddress(), "aPos");
@@ -64,16 +64,10 @@ void Object::assignVAOandVBO(Screen *screen){
   glVertexAttribPointer(positionAttributeLocation, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)0);
   glEnableVertexAttribArray(positionAttributeLocation);
 
+  glBindBuffer(GL_ARRAY_BUFFER, 0);
   glBindVertexArray(0);
-}
 
-void Object::reassignVAOandVBO(){
-  std::vector<float> vertices = worldFacesVerticesBuffer();
-
-  glBindVertexArray(VAO);
-  glBindBuffer(GL_ARRAY_BUFFER, VBO);
-  glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), vertices.data(), GL_DYNAMIC_DRAW);
-  glBindVertexArray(0);
+  GPUrefreshed = false;
 }
 
 // protected
@@ -101,7 +95,7 @@ void Object::recalculateWorldVertices() {
     verticeToWorld(vertice);
   }
 
-  reassignVAOandVBO();
+  GPUrefreshed = false;
 }
 
 // private

@@ -36,6 +36,7 @@ Screen::Screen() {
 void Screen::addObjectToScene(Object &object)
 {
   object.assignVAOandVBO(this);
+  object.renderToGPU();
   sceneObjects.push_back(&object);
 }
 
@@ -59,9 +60,12 @@ void Screen::eventLoop() {
     glUniformMatrix4fv(glGetUniformLocation(shaderProgramAddress, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
 
     for(Object *object : sceneObjects){
-      glBindVertexArray(object->getVAO_address());
+      if(!object->isGPUrefreshed()) // Optimization, only refresh VBO when needed
+        object->renderToGPU();
 
-      glDrawArrays(GL_TRIANGLES, 0, object->worldFacesVerticesBuffer().size() / 3);
+      glBindVertexArray(object->getVAO_address());
+      glDrawArrays(GL_TRIANGLES, 0, object->getFaceSize() * 3);
+      glBindVertexArray(0);
     }
 
     // Swap buffers and poll events
