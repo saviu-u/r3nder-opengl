@@ -5,6 +5,8 @@
 #include <glm/gtx/euler_angles.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <chrono>
+
 #include "object.h"
 #include "prebuilt/camera.h"
 
@@ -37,18 +39,27 @@ Screen::Screen() {
 
 void Screen::addObjectToScene(Object &object)
 {
+  sceneObjects.push_back(&object);
+
   object.assignVAOandVBO(this);
   object.renderToGPU();
-  sceneObjects.push_back(&object);
+  object.start();
 }
 
 void Screen::eventLoop() {
+  auto lastFrameTime = std::chrono::high_resolution_clock::now();
   // Set up rendering loop
   while (!glfwWindowShouldClose(window))
   {
     // Clear the screen
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    // Calculate delta time
+    auto currentFrameTime = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<float> frameDuration = currentFrameTime - lastFrameTime;
+    lastFrameTime = currentFrameTime;
+    float deltaTime = frameDuration.count();
 
     // Set model, view, and projection matrices
     glm::mat4 view = mainCamera->getViewMatrix();
@@ -62,6 +73,8 @@ void Screen::eventLoop() {
     glUniformMatrix4fv(glGetUniformLocation(shaderProgramAddress, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
 
     for(Object *object : sceneObjects){
+      object->update(deltaTime);
+
       if(!object->isGPUrefreshed()) // Optimization, only refresh VBO when needed
         object->renderToGPU();
 

@@ -22,6 +22,9 @@ public:
   void assignVAOandVBO(Screen* screen);
   void renderToGPU();
 
+  virtual void start() {}
+  virtual void update(float deltaTime) {}
+
   unsigned int getVAO_address() const { return VAO; }
   unsigned int getFaceSize() const { return localFaces.size(); }
   glm::mat4 getRotationMatrix() const { return rotationMatrix; }

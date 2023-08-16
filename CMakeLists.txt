@@ -7,11 +7,12 @@ include_directories(${OPENGL_INCLUDE_DIRS})
 include_directories(${GLFW_INCLUDE_DIRS})
 
 file(GLOB_RECURSE ENGINE_SRCS engine/src/*.cpp)
+file(GLOB_RECURSE CUSTOM_SRCS custom/src/*.cpp)
 
 include(CTest)
 enable_testing()
 
-add_executable(r3nder-opengl ${ENGINE_SRCS} main.cpp)
+add_executable(r3nder-opengl ${ENGINE_SRCS} ${CUSTOM_SRCS} main.cpp)
 
 # Add the glad directory to the include path
 include_directories(${CMAKE_SOURCE_DIR}/glad/include)
@@ -19,7 +20,7 @@ include_directories(${CMAKE_SOURCE_DIR}/glad/include)
 # Add glad source file to the project
 add_library(glad ${CMAKE_SOURCE_DIR}/glad/src/glad.c)
 
-target_include_directories(r3nder-opengl PRIVATE glm engine/include)
+target_include_directories(r3nder-opengl PRIVATE glm engine/include custom/include)
 
 # Link against OpenGL, GLFW, and GLAD libraries
 target_link_libraries(r3nder-opengl ${OPENGL_LIBRARIES} glfw glad)
