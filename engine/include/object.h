@@ -24,6 +24,7 @@ public:
 
   unsigned int getVAO_address() const { return VAO; }
   unsigned int getFaceSize() const { return localFaces.size(); }
+  glm::mat4 getRotationMatrix() const { return rotationMatrix; }
 
   bool isGPUrefreshed() { return GPUrefreshed; }
 

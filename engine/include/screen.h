@@ -6,6 +6,8 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
+class Camera;
+
 class Object;
 
 class Screen
@@ -18,6 +20,8 @@ public:
 public:
   unsigned int getShaderProgramAddress() const { return shaderProgramAddress; }
   void addObjectToScene(Object &object);
+  void setMainCamera(Camera &camera);
+  void updateCameraAttributes();
 
   void eventLoop();
   void close();
@@ -26,6 +30,7 @@ private:
   void initializeGL();
   void compileShaders();
   void initializeShaderProgram();
+
   std::string importShader(std::string filePath) const;
 
   // attributes
@@ -37,6 +42,8 @@ protected:
   std::vector<Object*> sceneObjects;
 private:
   GLFWwindow *window;
+
+  Camera *mainCamera;
 
   unsigned int shaderProgramAddress;
 

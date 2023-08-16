@@ -6,6 +6,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include "object.h"
+#include "prebuilt/camera.h"
 
 // Callback methods (not member method)
 
@@ -18,6 +19,7 @@ void frameBufferSizeCallback(GLFWwindow *window, int width, int height)
 
   instance->aspectRatio = (float)width / height;
 
+  instance->updateCameraAttributes();
   glViewport(0, 0, width, height);
 }
 
@@ -49,8 +51,8 @@ void Screen::eventLoop() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     // Set model, view, and projection matrices
-    glm::mat4 view = glm::lookAt(glm::vec3(0.0f, 0.0f, -3.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-    glm::mat4 projection = glm::perspective(glm::radians(90.0f), aspectRatio, 0.1f, 100.0f);
+    glm::mat4 view = mainCamera->getViewMatrix();
+    glm::mat4 projection = mainCamera->getPerspectiveMatrix();
 
     // Use shader program and bind cube VAO
     glUseProgram(shaderProgramAddress);
@@ -76,6 +78,17 @@ void Screen::eventLoop() {
 
 void Screen::close(){
   glfwTerminate();
+}
+
+void Screen::setMainCamera(Camera &camera){
+  mainCamera = &camera;
+  updateCameraAttributes();
+}
+
+void Screen::updateCameraAttributes(){
+  if(!mainCamera) return;
+
+  mainCamera->refreshAttributes(this);
 }
 
 // private
